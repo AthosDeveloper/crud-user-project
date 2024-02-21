@@ -2,6 +2,7 @@ package com.project.userproject.controller
 
 import com.project.userproject.domain.DTO.UserDTO
 import com.project.userproject.domain.model.User
+import com.project.userproject.exception.ResourceNotFoundException
 import com.project.userproject.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,7 +22,7 @@ class UserController (private  val userService: UserService) {
 fun listUsers(): ResponseEntity<List<UserDTO>> = ResponseEntity.ok(userService.findAll())
 @GetMapping("/{id}")
 fun getUserById(@PathVariable id: Long): ResponseEntity<UserDTO> =
-        userService.findById(id)?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
+        userService.findById(id)?.let { ResponseEntity.ok(it) } ?: throw ResourceNotFoundException("user not found")
 @PostMapping
 fun createUser(@RequestBody userDTO: UserDTO): ResponseEntity<UserDTO> = ResponseEntity.ok(userService.save(userDTO))
     @DeleteMapping("/{id}")
@@ -29,12 +30,12 @@ fun createUser(@RequestBody userDTO: UserDTO): ResponseEntity<UserDTO> = Respons
             userService.findById(id)?.let {
                 userService.deleteById(id)
                 ResponseEntity<Void>(HttpStatus.OK)
-            } ?: ResponseEntity.notFound().build()
+            } ?: throw ResourceNotFoundException("user not found with id $id")
     @PutMapping("/{id}")
     fun updateUser(@PathVariable id: Long, @RequestBody userDTO: UserDTO): ResponseEntity<UserDTO> =
             userService.findById(id)?.let {
                 val updatedUserDTO = it.copy(name = userDTO.name, email = userDTO.email)
                 ResponseEntity.ok(userService.save(updatedUserDTO))
-            } ?:ResponseEntity.notFound().build()
+            } ?: throw ResourceNotFoundException("user not found with id $id")
 
 }
