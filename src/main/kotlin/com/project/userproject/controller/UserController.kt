@@ -1,5 +1,6 @@
 package com.project.userproject.controller
 
+import com.project.userproject.domain.DTO.UserDTO
 import com.project.userproject.domain.model.User
 import com.project.userproject.service.UserService
 import org.springframework.http.HttpStatus
@@ -17,23 +18,23 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/users")
 class UserController (private  val userService: UserService) {
 @GetMapping
-fun listUsers(): ResponseEntity<List<User>> = ResponseEntity.ok(userService.findAll())
+fun listUsers(): ResponseEntity<List<UserDTO>> = ResponseEntity.ok(userService.findAll())
 @GetMapping("/{id}")
-fun getUserById(@PathVariable id: Long): ResponseEntity<User> =
+fun getUserById(@PathVariable id: Long): ResponseEntity<UserDTO> =
         userService.findById(id)?.let { ResponseEntity.ok(it) } ?: ResponseEntity.notFound().build()
 @PostMapping
-fun createUser(@RequestBody user: User): ResponseEntity<User> = ResponseEntity.ok(userService.save(user))
-@PutMapping("/{id}")
-fun updateUser(@PathVariable id: Long, @RequestBody user: User): ResponseEntity<User> =
-        userService.findById(id)?.let {
-            val updatedUser = it.copy(name = user.name, email =     user.email)
-            ResponseEntity.ok(userService.save(updatedUser))
-        } ?:ResponseEntity.notFound().build()
+fun createUser(@RequestBody userDTO: UserDTO): ResponseEntity<UserDTO> = ResponseEntity.ok(userService.save(userDTO))
     @DeleteMapping("/{id}")
     fun deleteUser(@PathVariable id: Long): ResponseEntity<Void> =
             userService.findById(id)?.let {
                 userService.deleteById(id)
                 ResponseEntity<Void>(HttpStatus.OK)
             } ?: ResponseEntity.notFound().build()
+    @PutMapping("/{id}")
+    fun updateUser(@PathVariable id: Long, @RequestBody userDTO: UserDTO): ResponseEntity<UserDTO> =
+            userService.findById(id)?.let {
+                val updatedUserDTO = it.copy(name = userDTO.name, email = userDTO.email)
+                ResponseEntity.ok(userService.save(updatedUserDTO))
+            } ?:ResponseEntity.notFound().build()
 
 }
